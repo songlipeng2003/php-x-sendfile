@@ -1,0 +1,7 @@
+{
+    "name": "songlipeng2003/php-x-sendfile",
+    "description": "php-x-sendfile",
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
