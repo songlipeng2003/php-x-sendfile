@@ -4,8 +4,9 @@ namespace XSendfile;
 class XSendfile
 {
 
-    const SERVER_TYPE_APACHE = "apache";
-    const SERVER_TYPE_NGINX = "nginx";
+    const SERVER_TYPE_APACHE = "Apache";
+    const SERVER_TYPE_NGINX = "Nginx";
+    const SERVER_TYPE_LIGHTTPD = "Lighttpd";
 
     public static function xSendfile($file, $serverType)
     { 
@@ -20,6 +21,9 @@ class XSendfile
                     break;
                 case self::SERVER_TYPE_NGINX:
                     header("X-Accel-Redirect: $file");
+                    break;
+                case self::Lighttpd:
+                    header("X-LIGHTTPD-send-file: $file");
                     break;
                     
                 default:
