@@ -13,8 +13,17 @@ class XSendfileTest extends PHPUnit_Framework_TestCase
         XSendfile::xSendfile($file, XSendfile::SERVER_TYPE_APACHE);
 
         $headers_list = xdebug_get_headers();
-        
+
         $this->assertNotEmpty($headers_list);
         $this->assertContains("X-Sendfile: $file", $headers_list);
+
+
+        // nginx
+        XSendfile::xSendfile($file, XSendfile::SERVER_TYPE_NGINX);
+
+        $headers_list = xdebug_get_headers();
+        
+        $this->assertNotEmpty($headers_list);
+        $this->assertContains("X-Accel-Redirect: $file", $headers_list);
     }
 }

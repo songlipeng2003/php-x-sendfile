@@ -5,6 +5,7 @@ class XSendfile
 {
 
     const SERVER_TYPE_APACHE = "apache";
+    const SERVER_TYPE_NGINX = "nginx";
 
     public static function xSendfile($file, $serverType)
     { 
@@ -17,7 +18,10 @@ class XSendfile
                 case self::SERVER_TYPE_APACHE:
                     header("X-Sendfile: $file");
                     break;
-                
+                case self::SERVER_TYPE_NGINX:
+                    header("X-Accel-Redirect: $file");
+                    break;
+                    
                 default:
                     # code...
                     break;
