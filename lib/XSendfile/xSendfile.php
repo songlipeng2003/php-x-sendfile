@@ -31,6 +31,8 @@ class XSendfile
                     break;
             }
         }else{
+            ob_clean();
+            flush();
             // unknown server , use php stream
             readfile($file);
         }
