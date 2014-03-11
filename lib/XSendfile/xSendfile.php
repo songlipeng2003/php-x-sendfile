@@ -8,10 +8,28 @@ class XSendfile
     const SERVER_TYPE_NGINX = "Nginx";
     const SERVER_TYPE_LIGHTTPD = "Lighttpd";
 
-    public static function xSendfile($file, $serverType)
+    public static function xSendfile($file, $downFilename=null, $serverType=null)
     { 
         header("Content-type: application/octet-stream");
-        header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+
+        if($downFilename){
+            $filename = $downFilename;
+        }else{
+            $filename = basename($file);
+        }
+        $encodedFilename = rawurlencode($filename);
+        $userAgent = $_SERVER["HTTP_userAgent"]; 
+        // support ie
+        if(preg_match("/MSIE/", $userAgent) || preg_match("/Trident\/7.0/", $userAgent)) {
+            header('Content-Disposition: attachment; filename="' . $encodedFilename . '"');
+        // support firefox
+        } else if (preg_match("/Firefox/", $userAgent)) {
+            header('Content-Disposition: attachment; filename*="utf8\'\'' . $encodedFilename . '"');
+        // support safari and chrome
+        } else {
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+        }
+   
         header("Content-Length: ". filesize($file));
         
         if($serverType){
