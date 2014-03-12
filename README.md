@@ -2,8 +2,14 @@
 
 php send static files use web server, now support apache, nginx, Lighttpd
 
+## require
+php > 5.3
+
+php ext fileinfo
+
 ### Test
 use phpunit
+
 require xdebug
 
 ### License

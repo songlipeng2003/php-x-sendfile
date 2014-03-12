@@ -8,9 +8,31 @@ class XSendfile
     const SERVER_TYPE_NGINX = "Nginx";
     const SERVER_TYPE_LIGHTTPD = "Lighttpd";
 
-    public static function xSendfile($file, $downFilename=null, $serverType=null)
-    { 
-        header("Content-type: application/octet-stream");
+    public static function xSendfile($file, $downFilename=null, $serverType=null, $cache=true)
+    {
+        if($cache){
+            if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])){
+                $modifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
+                $modifiedSince = strtotime($modifiedSince);
+                if(filemtime($file)==$modifiedSince){
+                    header("HTTP/1.1 304: Not Modified");
+                    exit;
+                }
+            }
+
+            if(isset($_SERVER['IF-NONE-MATCH']) && $_SERVER['IF-NONE-MATCH']==md5(filemtime($file))){
+                header("HTTP/1.1 304: Not Modified");
+                exit;
+            }
+        }
+        
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file);
+        if($mime){
+            header("Content-type: $mime");
+        }else{
+            header("Content-type: application/octet-stream");
+        }
 
         if($downFilename){
             $filename = $downFilename;
@@ -31,6 +53,13 @@ class XSendfile
         }
    
         header("Content-Length: ". filesize($file));
+
+        if($cache){
+            header("Last-Modified: ". gmdate('D, d M Y H:i:s', filemtime($file)) . ' GMT');
+            header("Expires: ". gmdate('D, d M Y H:i:s', time()+2592000) . ' GMT');
+            header("Cache-Control: max-age=2592000");
+            header('Etag: " ' . md5(filemtime($file)) . '"');
+        }
         
         if($serverType){
             switch ($serverType) {
