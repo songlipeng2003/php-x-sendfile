@@ -25,8 +25,14 @@ class XSendfile
                 exit;
             }
         }
-
-        header("Content-type: application/octet-stream");
+        
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file);
+        if($mime){
+            header("Content-type: $mime");
+        }else{
+            header("Content-type: application/octet-stream");
+        }
 
         if($downFilename){
             $filename = $downFilename;
