@@ -40,7 +40,7 @@ class XSendfile
             $filename = basename($file);
         }
         $encodedFilename = rawurlencode($filename);
-        $userAgent = $_SERVER["HTTP_userAgent"]; 
+        $userAgent = $_SERVER["HTTP_USER_AGENT"]; 
         // support ie
         if(preg_match("/MSIE/", $userAgent) || preg_match("/Trident\/7.0/", $userAgent)) {
             header('Content-Disposition: attachment; filename="' . $encodedFilename . '"');
