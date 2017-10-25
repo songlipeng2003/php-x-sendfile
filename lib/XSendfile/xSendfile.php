@@ -8,6 +8,24 @@ class XSendfile
     const SERVER_TYPE_NGINX = "Nginx";
     const SERVER_TYPE_LIGHTTPD = "Lighttpd";
 
+    static public function detectServer() {
+        $server_software = !empty($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : '';
+
+        if (stripos($server_software, 'apache') !== false) {
+            return self::SERVER_TYPE_APACHE;
+        }
+
+        if (stripos($server_software, 'nginx') !== false) {
+            return self::SERVER_TYPE_NGINX;
+        }
+
+        if (stripos($server_software, 'lighttpd') !== false) {
+            return self::SERVER_TYPE_LIGHTTPD;
+        }
+
+        return null;
+    }
+
     public static function xSendfile($file, $downFilename=null, $serverType=null, $cache=true)
     {
         if($cache){
@@ -69,7 +87,7 @@ class XSendfile
                 case self::SERVER_TYPE_NGINX:
                     header("X-Accel-Redirect: $file");
                     break;
-                case self::Lighttpd:
+                case self::SERVER_TYPE_LIGHTTPD:
                     header("X-LIGHTTPD-send-file: $file");
                     break;
                     
