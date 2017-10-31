@@ -13,6 +13,26 @@ class XSendfileTest extends TestCase
 		$this->filename = 'tmp.png';
 	}
 
+	public function testDectServer()
+	{
+		$_SERVER['SERVER_SOFTWARE'] = 'Apache 2.4';
+		$serverType = XSendfile::detectServer();
+
+		$this->assertEquals(XSendfile::SERVER_TYPE_APACHE, $serverType);
+
+
+		$_SERVER['SERVER_SOFTWARE'] = 'Nginx 1.0';
+		$serverType = XSendfile::detectServer();
+
+		$this->assertEquals(XSendfile::SERVER_TYPE_NGINX, $serverType);
+
+
+		$_SERVER['SERVER_SOFTWARE'] = 'lighttpd 1.5';
+		$serverType = XSendfile::detectServer();
+
+		$this->assertEquals(XSendfile::SERVER_TYPE_LIGHTTPD, $serverType);
+	}
+
     /**
      * @runInSeparateProcess
      */
@@ -93,6 +113,42 @@ class XSendfileTest extends TestCase
 
         $this->assertNotEmpty($headers_list);
         $this->assertContains("Cache-Control: max-age=2592000", $headers_list);
+	}
+
+    /**
+     * @runInSeparateProcess
+     * @depends testChrome
+     */
+	public function testCacheSince()
+	{
+
+    	$_SERVER["HTTP_USER_AGENT"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
+    	$_SERVER['HTTP_IF_MODIFIED_SINCE'] = date('Y-m-d H:i:s', filemtime($this->file));
+
+        XSendfile::xSendfile($this->file, $this->filename, XSendfile::SERVER_TYPE_APACHE, true);
+
+        $headers_list = xdebug_get_headers();
+
+        $this->assertNotEmpty($headers_list);
+        $this->assertContains("HTTP/1.1 304: Not Modified", $headers_list);
+	}
+
+    /**
+     * @runInSeparateProcess
+     * @depends testChrome
+     */
+	public function testCacheMatch()
+	{
+
+    	$_SERVER["HTTP_USER_AGENT"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
+    	$_SERVER['IF-NONE-MATCH'] = md5(filemtime($this->file));
+
+        XSendfile::xSendfile($this->file, $this->filename, XSendfile::SERVER_TYPE_APACHE, true);
+
+        $headers_list = xdebug_get_headers();
+
+        $this->assertNotEmpty($headers_list);
+        $this->assertContains("HTTP/1.1 304: Not Modified", $headers_list);
 	}
 
     /**

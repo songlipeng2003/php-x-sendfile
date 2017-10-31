@@ -34,13 +34,13 @@ class XSendfile
 				$modifiedSince = strtotime($modifiedSince);
 				if(filemtime($file)==$modifiedSince){
 					header("HTTP/1.1 304: Not Modified");
-					exit;
+					return;
 				}
 			}
 
 			if(isset($_SERVER['IF-NONE-MATCH']) && $_SERVER['IF-NONE-MATCH']==md5(filemtime($file))){
 				header("HTTP/1.1 304: Not Modified");
-				exit;
+				return;
 			}
 		}
 
@@ -93,10 +93,6 @@ class XSendfile
 					break;
 				case self::SERVER_TYPE_LIGHTTPD:
 					header("X-LIGHTTPD-send-file: $file");
-					break;
-
-				default:
-					# code...
 					break;
 			}
 		}else{
