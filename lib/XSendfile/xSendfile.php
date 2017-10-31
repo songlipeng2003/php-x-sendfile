@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace XSendfile;
 
 class XSendfile
@@ -8,7 +8,7 @@ class XSendfile
     const SERVER_TYPE_NGINX = "Nginx";
     const SERVER_TYPE_LIGHTTPD = "Lighttpd";
 
-    static public function detectServer() {
+    public static function detectServer() {
         $server_software = !empty($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : '';
 
         if (stripos($server_software, 'apache') !== false) {
@@ -43,7 +43,7 @@ class XSendfile
                 exit;
             }
         }
-        
+
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime = finfo_file($finfo, $file);
         if($mime){
@@ -58,7 +58,7 @@ class XSendfile
             $filename = basename($file);
         }
         $encodedFilename = rawurlencode($filename);
-        $userAgent = $_SERVER["HTTP_USER_AGENT"]; 
+        $userAgent = $_SERVER["HTTP_USER_AGENT"];
         // support ie
         if(preg_match("/MSIE/", $userAgent) || preg_match("/Trident\/7.0/", $userAgent)) {
             header('Content-Disposition: attachment; filename="' . $encodedFilename . '"');
@@ -69,7 +69,7 @@ class XSendfile
         } else {
             header('Content-Disposition: attachment; filename="' . $filename . '"');
         }
-   
+
         header("Content-Length: ". filesize($file));
 
         if($cache){
@@ -78,7 +78,11 @@ class XSendfile
             header("Cache-Control: max-age=2592000");
             header('Etag: " ' . md5(filemtime($file)) . '"');
         }
-        
+
+        if(!$serverType){
+        	$serverType = self::detectServer();
+        }
+
         if($serverType){
             switch ($serverType) {
                 case self::SERVER_TYPE_APACHE:
@@ -90,7 +94,7 @@ class XSendfile
                 case self::SERVER_TYPE_LIGHTTPD:
                     header("X-LIGHTTPD-send-file: $file");
                     break;
-                    
+
                 default:
                     # code...
                     break;
