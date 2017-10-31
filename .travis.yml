@@ -17,3 +17,7 @@ before_script:
   - mkdir -p log
 
 script: phpunit
+
+addons:
+  code_climate:
+    repo_token: 39a499ae17627cba18476644a99eaeda2fe56112a510f41011f0122cc65f6b6f

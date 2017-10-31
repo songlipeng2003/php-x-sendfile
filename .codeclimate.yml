@@ -1,0 +1,18 @@
+---
+engines:
+	duplication:
+		enabled: true
+		config:
+			languages:
+				php:
+					mass_threshold: 8
+
+	fixme:
+		enabled: true
+	phpmd:
+		enabled: true
+ratings:
+	paths:
+		- "**.php"
+exclude_paths:
+	- test/
