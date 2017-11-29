@@ -127,10 +127,7 @@ class XSendfileTest extends TestCase
 
         XSendfile::xSendfile($this->file, $this->filename, XSendfile::SERVER_TYPE_APACHE, true);
 
-        $headers_list = xdebug_get_headers();
-
-        $this->assertNotEmpty($headers_list);
-        $this->assertContains("HTTP/1.1 304: Not Modified", $headers_list);
+        $this->assertEquals(304, http_response_code());
 	}
 
     /**
@@ -145,10 +142,7 @@ class XSendfileTest extends TestCase
 
         XSendfile::xSendfile($this->file, $this->filename, XSendfile::SERVER_TYPE_APACHE, true);
 
-        $headers_list = xdebug_get_headers();
-
-        $this->assertNotEmpty($headers_list);
-        $this->assertContains("HTTP/1.1 304: Not Modified", $headers_list);
+        $this->assertEquals(304, http_response_code());
 	}
 
     /**
