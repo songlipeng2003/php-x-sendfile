@@ -1,7 +1,29 @@
-<phpunit>
-  <testsuites>
-    <testsuite name="PHP x sendfile Test">
-      <directory>test</directory>
-    </testsuite>
-  </testsuites>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:nonamespaceschemalocation="https://schema.phpunit.de/6.0/phpunit.xsd"
+	bootstrap="vendor/autoload.php"
+	color="true">
+    <testsuites>
+        <testsuite name="PHP x sendfile Test">
+            <directory>
+                test
+            </directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist processuncoveredfilesfromwhitelist="true">
+            <directory suffix=".php">
+               lib
+            </directory>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log charset="UTF-8" highlight="true" highlowerbound="80" lowupperbound="50" target="./log/report" type="coverage-html" yui="true" />
+        <log target="./log/testdox.html" type="testdox-html" />
+        <log type="coverage-clover" target="./log/clover.xml"/>
+  		<log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
+    </logging>
 </phpunit>
