@@ -1,5 +1,7 @@
 ## php x-sendfile
 
+[![Build Status](https://travis-ci.org/songlipeng2003/php-x-sendfile.svg?branch=develop)](https://travis-ci.org/songlipeng2003/php-x-sendfile)
+
 php send static files use web server, now support apache, nginx, Lighttpd
 
 ## require
