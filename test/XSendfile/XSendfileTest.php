@@ -31,6 +31,12 @@ class XSendfileTest extends TestCase
 		$serverType = XSendfile::detectServer();
 
 		$this->assertEquals(XSendfile::SERVER_TYPE_LIGHTTPD, $serverType);
+
+
+		$_SERVER['SERVER_SOFTWARE'] = 'None';
+		$serverType = XSendfile::detectServer();
+
+		$this->assertEquals(null, $serverType);
 	}
 
     /**
@@ -177,5 +183,22 @@ class XSendfileTest extends TestCase
 
         $this->assertNotEmpty($headers_list);
         $this->assertContains("X-LIGHTTPD-send-file: $this->file", $headers_list);
+    }
+
+	/**
+     * @runInSeparateProcess
+     * @depends testChrome
+     */
+    public function testImageFile()
+    {
+
+    	$_SERVER["HTTP_USER_AGENT"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
+
+        XSendfile::xSendfile($this->file);
+
+        $headers_list = xdebug_get_headers();
+
+        $this->assertNotEmpty($headers_list);
+        $this->assertContains("Content-type: image/png", $headers_list);
     }
 }
