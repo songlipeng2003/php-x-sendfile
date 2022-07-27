@@ -7,7 +7,7 @@ class XSendfileTest extends TestCase
 	private $file;
 	private $filename;
 
-	public function setUp()
+	public function setUp() : void
 	{
 		$this->file = dirname(__FILE__)."/../tmp.png";
 		$this->filename = 'tmp.png';
