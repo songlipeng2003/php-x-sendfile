@@ -6,9 +6,9 @@
 php send static files use web server, now support apache, nginx, Lighttpd
 
 ## require
-php >= 7.2
+php >= 7.3
 
-if you use php < 7.2, you can use 1.* version
+if you use php < 7.3, you can use 1.* version
 
 php ext fileinfo
 
