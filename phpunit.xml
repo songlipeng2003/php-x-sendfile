@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:nonamespaceschemalocation="https://schema.phpunit.de/6.0/phpunit.xsd"
-	bootstrap="vendor/autoload.php"
-	color="true">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheResultFile="build/cache/test-results"
+         executionOrder="depends,defects"
+         forceCoversAnnotation="true"
+         beStrictAboutCoversAnnotation="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         convertDeprecationsToExceptions="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         verbose="true">
     <testsuites>
-        <testsuite name="PHP x sendfile Test">
-            <directory>
-                test
-            </directory>
+        <testsuite name="default">
+            <directory>test</directory>
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist processuncoveredfilesfromwhitelist="true">
-            <directory suffix=".php">
-               lib
-            </directory>
-        </whitelist>
-    </filter>
+    <coverage cacheDirectory="build/cache"
+              processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">lib</directory>
+        </include>
 
-    <logging>
-        <log charset="UTF-8" highlight="true" highlowerbound="80" lowupperbound="50" target="./log/report" type="coverage-html" yui="true" />
-        <log target="./log/testdox.html" type="testdox-html" />
-        <log type="coverage-clover" target="./log/clover.xml"/>
-  		<log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
-    </logging>
+		<report>
+			<clover outputFile="build/clover.xml"/>
+			<crap4j outputFile="build/crap4j.xml" threshold="50"/>
+			<html outputDirectory="build/coverage/html" lowUpperBound="50" highLowerBound="90"/>
+			<text outputFile="build/coverage/coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
+			<xml outputDirectory="build/coverage/xml"/>
+		</report>
+    </coverage>
 </phpunit>
