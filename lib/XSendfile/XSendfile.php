@@ -29,7 +29,7 @@ class XSendfile {
 		return null;
 	}
 
-	public static function xSendfile( $file, $downFilename = null, $serverType = null, $cache = true, $autoContentType = true ) {
+	public static function xSendfile( $file, $downFilename = null, $serverType = null, $cache = true, $autoContentType = true, $autoContentDisposition = true ) {
 		if ( $cache ) {
 			if ( isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 				$modifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
@@ -56,25 +56,24 @@ class XSendfile {
 				header( "Content-type: application/octet-stream" );
 			}
 		}
-
-		if ( $downFilename ) {
-			$filename = $downFilename;
-		} else {
-			$filename = basename( $file );
-		}
-
-		$encodedFilename = rawurlencode( $filename );
-		$userAgent       = $_SERVER["HTTP_USER_AGENT"];
-
-		// support ie
-		if ( false !== strpos( $userAgent, "MSIE" ) || preg_match( "/Trident\/7.0/", $userAgent ) ) {
-			header( 'Content-Disposition: attachment; filename="' . $encodedFilename . '"' );
-			// support firefox
-		} else if ( false !== strpos( $userAgent, "Firefox" ) ) {
-			header( 'Content-Disposition: attachment; filename*="utf8\'\'' . $encodedFilename . '"' );
-			// support safari and chrome
-		} else {
-			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		if ($autoContentDisposition) {
+			if ($downFilename) {
+				$filename = $downFilename;
+			} else {
+				$filename = basename($file);
+			}
+			$encodedFilename = rawurlencode($filename);
+			$userAgent       = $_SERVER["HTTP_USER_AGENT"];
+			// support ie
+			if (false !== strpos($userAgent, "MSIE") || preg_match("/Trident\/7.0/", $userAgent)) {
+				header('Content-Disposition: attachment; filename="' . $encodedFilename . '"');
+				// support firefox
+			} else if (false !== strpos($userAgent, "Firefox")) {
+				header('Content-Disposition: attachment; filename*="utf8\'\'' . $encodedFilename . '"');
+				// support safari and chrome
+			} else {
+				header('Content-Disposition: attachment; filename="' . $filename . '"');
+			}
 		}
 
 		header( "Content-Length: " . filesize( $file ) );
