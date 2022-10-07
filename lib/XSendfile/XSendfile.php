@@ -29,7 +29,7 @@ class XSendfile {
 		return null;
 	}
 
-	public static function xSendfile( $file, $downFilename = null, $serverType = null, $cache = true ) {
+	public static function xSendfile( $file, $downFilename = null, $serverType = null, $cache = true, $autoContentType = true ) {
 		if ( $cache ) {
 			if ( isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 				$modifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
@@ -47,13 +47,14 @@ class XSendfile {
 				return;
 			}
 		}
-
-		$finfo = finfo_open( FILEINFO_MIME_TYPE );
-		$mime  = finfo_file( $finfo, $file );
-		if ( $mime ) {
-			header( "Content-type: $mime" );
-		} else {
-			header( "Content-type: application/octet-stream" );
+		if( $autoContentType ) {
+			$finfo = finfo_open( FILEINFO_MIME_TYPE );
+			$mime  = finfo_file( $finfo, $file );
+			if ( $mime ) {
+				header( "Content-type: {$mime}" );
+			} else {
+				header( "Content-type: application/octet-stream" );
+			}
 		}
 
 		if ( $downFilename ) {
