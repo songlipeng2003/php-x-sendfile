@@ -170,9 +170,6 @@ class XSendfile {
 						return;
 					}
 				}
-				$length = ($end - $start) + 1;
-				header("Content-Length: {$length}");
-				header("Content-Range: bytes {$start}-{$end}/{$filesize}");
 				try {
 					$fp = fopen($path, 'rb');
 					if ($fp === false) {
@@ -185,6 +182,9 @@ class XSendfile {
 						throw new \RuntimeException("Failed to open php://output for writing");
 					}
 					http_response_code(206);
+					$length = ($end - $start) + 1;
+					header("Content-Length: {$length}");
+					header("Content-Range: bytes {$start}-{$end}/{$filesize}");
 					$sent = stream_copy_to_stream($fp, $output, $length, $start);
 					fclose($fp);
 					fclose($output);
@@ -195,6 +195,7 @@ class XSendfile {
 				} catch (Throwable $ex) {
 					if(!headers_sent()) {
 						http_response_code(500);
+						header("Content-Length: ", true);
 					}
 					if (filter_var(ini_get('display_errors'),FILTER_VALIDATE_BOOLEAN)) {
 						var_dump(["ex"=>$ex, "error_get_last"=>error_get_last()]);
