@@ -75,9 +75,6 @@ class XSendfile {
 				header('Content-Disposition: attachment; filename="' . $filename . '"');
 			}
 		}
-
-		header( "Content-Length: " . filesize( $file ) );
-
 		if ( $cache ) {
 			header( "Last-Modified: " . gmdate( 'D, d M Y H:i:s', filemtime( $file ) ) . ' GMT' );
 			header( "Expires: " . gmdate( 'D, d M Y H:i:s', time() + 2592000 ) . ' GMT' );
@@ -116,7 +113,97 @@ class XSendfile {
 			ob_clean();
 			flush();
 			// unknown server , use php stream
-			readfile( $file );
+			$filesize = filesize( $file );
+			// check for HTTP Range requests
+			$range = $_SERVER['HTTP_RANGE'] ?? null;
+			if ($range === null) {
+				header("Accept-Ranges: bytes");
+				header("Content-Length: {$filesize}");
+				readfile( $file );
+			} else {
+				if (substr_compare($range, "bytes=", 0, 6, false) !== 0) {
+					http_response_code(416);
+					echo "Invalid Range header: does not start with 'bytes='";
+					return;
+				}
+				$range = substr($range, strlen("bytes="));
+				$range = explode('-', $range);
+				if (count($range) < 2) {
+					http_response_code(416);
+					echo "Invalid range: dash missing";
+					return;
+				}
+				if (count($range) > 2) {
+					http_response_code(416);
+					echo "Invalid range: more than 1 dash";
+					return;
+				}
+				$start = filter_var(trim($range[0]), FILTER_VALIDATE_INT);
+				if ($start === false || $start < 0) {
+					http_response_code(416);
+					echo "Invalid range: start is not an integer >=0";
+					return;
+				}
+				if ($start >= $filesize) {
+					http_response_code(416);
+					echo "Invalid range: start is >= filesize";
+					return;
+				}
+				$end = $range[1];
+				if ($end === "") {
+					$end = $filesize - 1;
+				} else {
+					$end = filter_var(trim($range[1]), FILTER_VALIDATE_INT);
+					if ($end === false) {
+						http_response_code(416);
+						echo "Invalid range: end is not an integer";
+						return;
+					}
+					if ($end >= $filesize) {
+						//echo "Invalid range: end is larger than filesize";
+						// this request is actually legal, i think. at least nginx accepts it:
+						$end = $filesize - 1;
+					} elseif ($end < $start) {
+						http_response_code(416);
+						echo "Invalid range: end is smaller than start";
+						return;
+					}
+				}
+				try {
+					$fp = fopen($path, 'rb');
+					if ($fp === false) {
+						throw new \RuntimeException("Failed to open file " . $path . " for reading ");
+					}
+					// using this php://output hack because fpassthru is unsuitable: https://github.com/php/php-src/issues/9673
+					$output = fopen('php://output', 'wb');
+					if ($output === false) {
+						fclose($fp);
+						throw new \RuntimeException("Failed to open php://output for writing");
+					}
+					http_response_code(206);
+					$length = ($end - $start) + 1;
+					header("Content-Length: {$length}");
+					header("Content-Range: bytes {$start}-{$end}/{$filesize}");
+					$sent = stream_copy_to_stream($fp, $output, $length, $start);
+					fclose($fp);
+					fclose($output);
+					if ($sent === false) {
+						throw new \RuntimeException("Failed to send file");
+					}
+					return;
+				} catch (Throwable $ex) {
+					if(!headers_sent()) {
+						http_response_code(500);
+						header("Content-Length: ", true);
+					}
+					if (filter_var(ini_get('display_errors'),FILTER_VALIDATE_BOOLEAN)) {
+						var_dump(["ex"=>$ex, "error_get_last"=>error_get_last()]);
+					} else {
+						echo "500 Internal Server Error: An internal server error has been occurred.";
+					}
+					throw $ex;
+				}
+			}
 		}
 	}
 
