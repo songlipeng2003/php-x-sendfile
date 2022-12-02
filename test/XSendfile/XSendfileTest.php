@@ -202,7 +202,11 @@ class XSendfileTest extends TestCase
 
         $this->assertNotEmpty($headers_list);
         $this->assertContains("Content-type: text/plain;charset=UTF-8", $headers_list);
-		$this->assertEquals("hello\n", $output);
+		if (PHP_OS_FAMILY === "Windows") {
+			$this->assertEquals("hello\r\n", $output);
+		} else {
+			$this->assertEquals("hello\n", $output);
+		}
     }
 
 	/**
@@ -224,7 +228,12 @@ class XSendfileTest extends TestCase
 
         $this->assertNotEmpty($headers_list);
         $this->assertContains("Content-Length: 2", $headers_list);
-        $this->assertContains("Content-Range: bytes 1-2/6", $headers_list);
+		if (PHP_OS_FAMILY === "Windows") {
+			$this->assertContains("Content-Range: bytes 1-2/7", $headers_list);
+		} else {
+			$this->assertContains("Content-Range: bytes 1-2/6", $headers_list);
+		}
+
 		$this->assertEquals('el', $output);
 	}
 }
