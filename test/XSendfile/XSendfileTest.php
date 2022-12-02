@@ -189,16 +189,42 @@ class XSendfileTest extends TestCase
      * @runInSeparateProcess
      * @depends testChrome
      */
-    // public function testImageFile()
-    // {
+    public function testFile()
+    {
+    	$_SERVER["HTTP_USER_AGENT"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
 
-    // 	$_SERVER["HTTP_USER_AGENT"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
+		ob_start();
+        XSendfile::xSendfile($this->file);
+		$output = ob_get_contents();
+        ob_end_clean();
 
-    //     XSendfile::xSendfile($this->file);
+        $headers_list = xdebug_get_headers();
 
-    //     $headers_list = xdebug_get_headers();
+        $this->assertNotEmpty($headers_list);
+        $this->assertContains("Content-type: text/plain;charset=UTF-8", $headers_list);
+		$this->assertEquals("hello\n", $output);
+    }
 
-    //     $this->assertNotEmpty($headers_list);
-    //     $this->assertContains("Content-type: text/plain;charset=UTF-8", $headers_list);
-    // }
+	/**
+     * @runInSeparateProcess
+     */
+	public function testHttpRange()
+	{
+		$_SERVER['HTTP_RANGE'] = 'bytes=1-2';
+		$_SERVER["HTTP_USER_AGENT"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
+
+		ob_start();
+		XSendfile::xSendfile($this->file);
+		$output = ob_get_contents();
+        ob_end_clean();
+
+		$headers_list = xdebug_get_headers();
+
+		// var_dump($headers_list);
+
+        $this->assertNotEmpty($headers_list);
+        $this->assertContains("Content-Length: 2", $headers_list);
+        $this->assertContains("Content-Range: bytes 1-2/6", $headers_list);
+		$this->assertEquals('el', $output);
+	}
 }

@@ -170,9 +170,9 @@ class XSendfile {
 					}
 				}
 				try {
-					$fp = fopen($path, 'rb');
+					$fp = fopen($file, 'rb');
 					if ($fp === false) {
-						throw new \RuntimeException("Failed to open file " . $path . " for reading ");
+						throw new \RuntimeException("Failed to open file " . $file . " for reading ");
 					}
 					// using this php://output hack because fpassthru is unsuitable: https://github.com/php/php-src/issues/9673
 					$output = fopen('php://output', 'wb');
@@ -191,7 +191,7 @@ class XSendfile {
 						throw new \RuntimeException("Failed to send file");
 					}
 					return;
-				} catch (Throwable $ex) {
+				} catch (\Throwable $ex) {
 					if(!headers_sent()) {
 						http_response_code(500);
 						header("Content-Length: ", true);
@@ -210,5 +210,5 @@ class XSendfile {
 	public static function pathToUri( $path ) {
 		return '/' . ltrim( str_replace( [ $_SERVER['DOCUMENT_ROOT'], '\\' ], [ '', '/' ], $path ), '/' );
 	}
-	
+
 }

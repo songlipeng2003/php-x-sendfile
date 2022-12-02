@@ -5,6 +5,11 @@
 
 php send static files use web server, now support apache, nginx, Lighttpd
 
+## Change Log
+
+[2.1.0] - 2022-12-02
+* Add Content-Range support, but not support Multipart ranges
+
 ## require
 php >= 7.3
 
